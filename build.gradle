@@ -1,0 +1,59 @@
+// app/build.gradle — Coupon Vault TWA module
+
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.couponvault.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.couponvault.app"
+        minSdk 19
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+
+        // TWA host — update to match your deployed domain
+        manifestPlaceholders = [
+            hostName: "your-domain.com",
+            defaultUrl: "https://your-domain.com/index.html",
+            launcherName: "Coupon Vault",
+            // Asset links verification fingerprint
+            assetStatements: '[{ \\"relation\\": [\\"delegate_permission/common.handle_all_urls\\"], \\"target\\": { \\"namespace\\": \\"android_app\\", \\"package_name\\": \\"com.couponvault.app\\", \\"sha256_cert_fingerprints\\": [\\"REPLACE_WITH_YOUR_SHA256\\"] } }]'
+        ]
+    }
+
+    signingConfigs {
+        release {
+            // Replace with your keystore details
+            storeFile file('../android.keystore')
+            storePassword System.getenv('KEYSTORE_PASSWORD') ?: 'changeme'
+            keyAlias 'couponvault'
+            keyPassword System.getenv('KEY_PASSWORD') ?: 'changeme'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // Trusted Web Activity support library
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

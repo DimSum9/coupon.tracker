@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#1D9E75" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Coupon Vault" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>Coupon Vault</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; font-size: 15px; line-height: 1.5;
+    transition: background 0.25s, color 0.25s;
+  }
+  input, select, textarea, button { font-family: inherit; }
+
+  :root {
+    --accent: #1D9E75; --accent-hover: #178a65; --accent-light: #E1F5EE; --accent-dark: #085041;
+    --amber: #BA7517; --amber-light: #FAEEDA; --amber-dark: #633806;
+    --red: #E24B4A; --red-light: #FCEBEB; --red-dark: #501313;
+    --purple: #534AB7; --purple-light: #EEEDFE; --purple-dark: #26215C;
+    --page: #f5f4f0; --surface: #fafaf8; --chrome: #ffffff;
+    --text-primary: #1a1a18; --text-secondary: #5F5E5A; --text-muted: #B4B2A9;
+    --border: rgba(0,0,0,0.11); --border-hover: rgba(0,0,0,0.22); --input-bg: #ffffff;
+    --tile-bg: #ffffff; --tile-border: 0.5px solid rgba(0,0,0,0.11); --tile-radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  /* ── BACKGROUND THEMES ── */
+  body.bg-white  { --page:#ffffff; --surface:#f5f5f5; --chrome:#ffffff; --text-primary:#111; --text-secondary:#555; --text-muted:#aaa; --border:rgba(0,0,0,0.1); --input-bg:#fff; --tile-bg:#fff; }
+  body.bg-sand   { --page:#f5f4f0; --surface:#fafaf8; --chrome:#ffffff; --text-primary:#1a1a18; --text-secondary:#5F5E5A; --text-muted:#B4B2A9; --border:rgba(0,0,0,0.11); --input-bg:#fff; --tile-bg:#fff; }
+  body.bg-slate  { --page:#1e2027; --surface:#262830; --chrome:#1a1b22; --text-primary:#e8e9ec; --text-secondary:#9ea3b0; --text-muted:#5c6070; --border:rgba(255,255,255,0.1); --border-hover:rgba(255,255,255,0.2); --input-bg:#2a2c36; --tile-bg:#262830; }
+  body.bg-forest { --page:#1a2420; --surface:#1f2e28; --chrome:#162019; --text-primary:#d4e8d8; --text-secondary:#7aaa88; --text-muted:#3d6347; --border:rgba(255,255,255,0.08); --border-hover:rgba(255,255,255,0.16); --input-bg:#1f2e28; --tile-bg:#1f2e28; }
+  body.bg-ocean  { --page:#0f1e2e; --surface:#152638; --chrome:#0c1a28; --text-primary:#c8dff0; --text-secondary:#6895b8; --text-muted:#2d5070; --border:rgba(255,255,255,0.09); --border-hover:rgba(255,255,255,0.18); --input-bg:#152638; --tile-bg:#152638; }
+  body.bg-cream  { --page:#fdf6e3; --surface:#fef9ee; --chrome:#fff8e8; --text-primary:#3b2f10; --text-secondary:#7a6030; --text-muted:#c0a870; --border:rgba(0,0,0,0.1); --input-bg:#fff; --tile-bg:#fff8e8; }
+
+  /* ── ACCENT COLORS ── */
+  body.accent-teal   { --accent:#1D9E75; --accent-hover:#178a65; --accent-light:#E1F5EE; --accent-dark:#085041; }
+  body.accent-indigo { --accent:#4F46E5; --accent-hover:#4338ca; --accent-light:#EEF2FF; --accent-dark:#3730a3; }
+  body.accent-coral  { --accent:#E05A2B; --accent-hover:#c94e23; --accent-light:#FEF0EB; --accent-dark:#9a3316; }
+  body.accent-violet { --accent:#7C3AED; --accent-hover:#6d28d9; --accent-light:#F5F3FF; --accent-dark:#4c1d95; }
+  body.accent-sky    { --accent:#0284C7; --accent-hover:#0369a1; --accent-light:#E0F2FE; --accent-dark:#0c4a6e; }
+  body.accent-rose   { --accent:#E11D48; --accent-hover:#be123c; --accent-light:#FFF1F2; --accent-dark:#881337; }
+
+  /* ── TILE STYLES ── */
+  body.tile-default .coupon-card  { background:var(--tile-bg); border:1.5px solid var(--border-hover); border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+  body.tile-default .retailer-tile { background:var(--tile-bg); border:1.5px solid var(--border-hover); border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+  body.tile-flat .coupon-card    { background:var(--surface); border:none; border-radius:12px; }
+  body.tile-flat .coupon-card.card-soon    { border-left:3px solid #EF9F27 !important; border-radius:0 12px 12px 0; }
+  body.tile-flat .coupon-card.card-expired { border-left:3px solid #F09595 !important; border-radius:0 12px 12px 0; }
+  body.tile-flat .coupon-card.card-redeemed{ border-left:3px solid #AFA9EC !important; border-radius:0 12px 12px 0; }
+  body.tile-flat .retailer-tile  { background:var(--surface); border:none; border-radius:14px; }
+  body.tile-bold .coupon-card    { background:var(--tile-bg); border:0.5px solid var(--border); border-radius:14px; overflow:hidden; padding-top:0; }
+  body.tile-bold .coupon-card::before { content:''; display:block; height:4px; background:var(--accent); margin-bottom:15px; }
+  body.tile-bold .coupon-card.card-soon::before    { background:#EF9F27; }
+  body.tile-bold .coupon-card.card-expired::before { background:#F09595; }
+  body.tile-bold .coupon-card.card-redeemed::before{ background:#AFA9EC; }
+  body.tile-bold .retailer-tile  { background:var(--tile-bg); border:0.5px solid var(--border); border-radius:16px; overflow:hidden; padding-top:0; }
+  body.tile-bold .retailer-tile::before { content:''; display:block; height:4px; background:var(--accent); }
+  body.tile-bold .rt-logo-wrap   { margin-top:16px; }
+  body.tile-outlined .coupon-card   { background:var(--tile-bg); border:2px solid var(--border-hover); border-radius:10px; box-shadow:none !important; }
+  body.tile-outlined .coupon-card.card-soon { border-color:#EF9F27 !important; border-width:2px; }
+  body.tile-outlined .retailer-tile { background:var(--tile-bg); border:2px solid var(--border-hover); border-radius:12px; box-shadow:none !important; }
+  body.tile-outlined .retailer-tile:hover { border-color:var(--accent); transform:none; }
+
+  /* ── Header ── */
+  .header { background:var(--chrome); border-bottom:0.5px solid var(--border); padding:0 24px; position:sticky; top:0; z-index:50; transition:background 0.25s; }
+  .header-inner { max-width:960px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:58px; gap:12px; }
+  .logo { display:flex; align-items:center; gap:9px; text-decoration:none; }
+  .logo i { font-size:22px; color:var(--accent); }
+  .logo-text { font-weight:600; font-size:17px; color:var(--text-primary); letter-spacing:-0.01em; }
+  .search-wrap { display:flex; align-items:center; gap:7px; background:var(--page); border:0.5px solid var(--border); border-radius:var(--radius-sm); padding:6px 11px; flex:1; max-width:280px; }
+  .search-wrap i { font-size:15px; color:var(--text-muted); flex-shrink:0; }
+  .search-wrap input { border:none; background:none; outline:none; font-size:13px; color:var(--text-primary); width:100%; }
+  .search-wrap input::placeholder { color:var(--text-muted); }
+  .btn-add {
+    position:relative; overflow:hidden;
+    background:linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    color:#fff; border:none;
+    border-radius:100px;
+    padding:9px 18px 9px 14px;
+    font-weight:700; font-size:13px; letter-spacing:0.02em;
+    cursor:pointer; display:flex; align-items:center; gap:7px;
+    white-space:nowrap;
+    box-shadow:0 3px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-add::before {
+    content:'';
+    position:absolute; top:0; left:-100%; width:60%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);
+    transition:left 0.45s ease;
+  }
+  .btn-add:hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18); }
+  .btn-add:hover::before { left:160%; }
+  .btn-add:active { transform:translateY(0); box-shadow:0 2px 8px rgba(0,0,0,0.16); }
+  .btn-add .btn-add-icon {
+    width:22px; height:22px; border-radius:50%;
+    background:rgba(255,255,255,0.22);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .btn-add .btn-add-icon i { font-size:14px; line-height:1; }
+
+  /* ── Nav ── */
+  .nav-bar { background:var(--chrome); border-bottom:0.5px solid var(--border); padding:0 24px; transition:background 0.25s; }
+  .nav-inner { max-width:960px; margin:0 auto; display:flex; }
+  .nav-tab { display:flex; align-items:center; gap:6px; padding:11px 15px; border:none; background:none; cursor:pointer; font-size:13px; font-weight:400; color:var(--text-secondary); border-bottom:2px solid transparent; margin-bottom:-1px; transition:color 0.15s; }
+  .nav-tab:hover { color:var(--text-primary); }
+  .nav-tab.active { font-weight:500; color:var(--accent); border-bottom-color:var(--accent); }
+  .nav-tab i { font-size:15px; }
+  .tab-badge { background:var(--red-light); color:var(--red-dark); font-size:10px; font-weight:500; padding:1px 5px; border-radius:5px; line-height:1.4; }
+
+  /* ── Breadcrumb ── */
+  .breadcrumb { display:flex; align-items:center; gap:6px; margin-bottom:20px; font-size:14px; color:var(--text-secondary); }
+  .breadcrumb button { background:none; border:none; cursor:pointer; color:var(--accent); font-size:14px; padding:0; font-weight:500; }
+  .breadcrumb button:hover { text-decoration:underline; }
+  .breadcrumb i { font-size:13px; color:var(--text-muted); }
+
+  /* ── Main ── */
+  .main { max-width:960px; margin:0 auto; padding:22px 24px 80px; padding-bottom:calc(80px + env(safe-area-inset-bottom)); }
+
+  /* ── PWA safe area (notch / gesture bar) ── */
+  .header { padding-top: env(safe-area-inset-top); }
+  #appearBtn { bottom: calc(24px + env(safe-area-inset-bottom)); right: calc(24px + env(safe-area-inset-right)); }
+
+  /* ── Filters ── */
+  .filters { display:flex; align-items:center; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
+  .filter-group { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-secondary); }
+  .filter-group i { font-size:14px; }
+  .filter-select { border:0.5px solid var(--border); border-radius:7px; padding:5px 9px; font-size:13px; background:var(--input-bg); color:var(--text-primary); cursor:pointer; outline:none; }
+  .filter-select:hover { border-color:var(--border-hover); }
+  .filter-stat { font-size:12px; color:var(--text-muted); margin-left:auto; }
+
+  /* ── Summary cards ── */
+  .summary-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-bottom:28px; }
+  .summary-card { border-radius:10px; padding:13px 15px; }
+  .summary-card .s-label { font-size:12px; font-weight:500; margin-bottom:4px; }
+  .summary-card .s-value { font-size:28px; font-weight:600; line-height:1; }
+  .sc-active   { background:var(--accent-light); } .sc-active .s-label,   .sc-active .s-value   { color:var(--accent-dark); }
+  .sc-soon     { background:var(--amber-light);  } .sc-soon .s-label,     .sc-soon .s-value     { color:var(--amber-dark);  }
+  .sc-expired  { background:var(--red-light);    } .sc-expired .s-label,  .sc-expired .s-value  { color:var(--red-dark);    }
+  .sc-redeemed { background:var(--purple-light); } .sc-redeemed .s-label, .sc-redeemed .s-value { color:var(--purple-dark); }
+
+  /* ── Section header ── */
+  .section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .section-header i { font-size:17px; color:var(--text-muted); }
+  .section-header .sh-label { font-weight:600; font-size:16px; color:var(--text-primary); }
+  .section-header .sh-count { font-size:13px; color:var(--text-muted); }
+  .section { margin-bottom:32px; }
+
+  /* ══ LOGO AVATAR — core component ══
+     Used in two sizes: sm (card inline) and lg (retailer tile)
+     The .logo-avatar div is the container; JS fills it.            */
+  .logo-avatar {
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--chrome);
+    border: 0.5px solid var(--border);
+  }
+  .logo-avatar img {
+    display: block;
+    object-fit: contain;
+  }
+  /* sm: used inside coupon card header */
+  .logo-avatar.sz-sm { width:40px; height:40px; border-radius:9px; }
+  .logo-avatar.sz-sm img { width:30px; height:30px; }
+  /* lg: used inside retailer tile — fills tile width */
+  .logo-avatar.sz-lg {
+    width: 100%;
+    height: 90px;
+    border-radius: 10px 10px 10px 10px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface);
+  }
+  .logo-avatar.sz-lg img { width:64px; height:64px; }
+  /* initials fallback — injected by JS */
+  .logo-initials {
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #fff; letter-spacing: -0.03em;
+    flex-shrink: 0; width:100%; height:100%;
+    line-height: 1;
+  }
+
+  /* ── Retailer grid ── */
+  .retailer-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+  .retailer-tile {
+    background:var(--tile-bg, var(--chrome));
+    border:1.5px solid var(--border-hover);
+    border-radius:16px;
+    overflow:hidden;
+    display:flex; flex-direction:column; align-items:stretch;
+    cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,0.07);
+    transition:box-shadow 0.18s, transform 0.12s, border-color 0.18s;
+    text-align:center;
+    aspect-ratio: 1 / 1.1;
+  }
+  .retailer-tile:hover { box-shadow:0 8px 28px rgba(0,0,0,0.14); transform:translateY(-3px); border-color:var(--accent); }
+  .retailer-tile:active { transform:translateY(0); }
+  /* logo fills almost the whole tile */
+  .rt-logo-area { width:100%; flex:1; min-height:0; position:relative; }
+  .rt-logo-area .logo-avatar.sz-lg { height:100%; border-radius:0; border:none; }
+  /* retailer name — frosted strip at top of logo zone */
+  .rt-name {
+    display:block;
+    position:absolute; top:0; left:0; right:0;
+    padding:7px 10px 6px;
+    font-size:12px; font-weight:700;
+    color:#fff;
+    background:rgba(0,0,0,0.48);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    line-height:1.2;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    letter-spacing:0.01em;
+    z-index:2;
+  }
+  /* narrow count strip at bottom */
+  .rt-body {
+    padding:6px 8px 7px;
+    display:flex; flex-direction:row; align-items:center; justify-content:center; gap:6px;
+    border-top:1px solid var(--border);
+    background:var(--surface);
+    flex-shrink:0;
+  }
+  .rt-count { font-size:12px; font-weight:600; color:var(--text-primary); }
+  .rt-soon  { font-size:10px; font-weight:600; background:var(--amber-light); color:var(--amber-dark); padding:2px 6px; border-radius:4px; }
+  .rt-location { display:none; }
+
+  /* ── Coupon grid ── */
+  .coupon-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+
+  /* ── Coupon card ── */
+  .coupon-card {
+    background:var(--tile-bg, var(--chrome));
+    border:1.5px solid var(--border-hover);
+    border-radius:14px;
+    padding:16px;
+    display:flex; flex-direction:column; gap:11px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.07);
+    transition:box-shadow 0.18s, transform 0.12s;
+  }
+  .coupon-card:hover { box-shadow:0 6px 22px rgba(0,0,0,0.13); transform:translateY(-2px); }
+  .coupon-card.card-soon    { border:2px solid #EF9F27 !important; }
+  .coupon-card.card-expired  { border-color:#F09595 !important; opacity:0.72; }
+  .coupon-card.card-redeemed { border-color:#AFA9EC !important; opacity:0.72; }
+
+  .card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .card-top-left { display:flex; align-items:center; gap:11px; flex:1; min-width:0; }
+  .card-meta { flex:1; min-width:0; }
+  .card-retailer { font-weight:600; font-size:15px; color:var(--text-primary); line-height:1.3; margin-bottom:3px; }
+  .card-title { font-size:13px; color:var(--text-secondary); line-height:1.4; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+
+  .badge { font-size:11px; font-weight:600; padding:3px 9px; border-radius:6px; white-space:nowrap; flex-shrink:0; letter-spacing:0.01em; }
+  .badge-active   { background:var(--accent-light);  color:var(--accent-dark);  }
+  .badge-soon     { background:var(--amber-light);   color:var(--amber-dark);   }
+  .badge-expired  { background:var(--red-light);     color:var(--red-dark);     }
+  .badge-redeemed { background:var(--purple-light);  color:var(--purple-dark);  }
+
+  .card-code { background:var(--page); border-radius:7px; padding:7px 11px; display:flex; align-items:center; gap:8px; }
+  .card-code i { font-size:14px; color:var(--text-muted); }
+  .card-code span { font-family:'SF Mono','Fira Code',monospace; font-size:13px; font-weight:600; color:var(--text-primary); letter-spacing:0.06em; }
+
+  .card-footer { display:flex; justify-content:space-between; align-items:center; }
+  .type-badge { background:var(--surface); color:var(--text-secondary); font-size:12px; font-weight:500; padding:3px 8px; border-radius:6px; white-space:nowrap; border:0.5px solid var(--border); }
+  .card-date { font-size:12px; color:var(--text-muted); font-weight:500; }
+
+  .card-actions { display:flex; gap:4px; border-top:0.5px solid var(--border); padding-top:10px; align-items:center; }
+  .act-btn { background:none; border:none; cursor:pointer; padding:5px 8px; border-radius:7px; color:var(--text-secondary); display:flex; align-items:center; transition:background 0.12s,color 0.12s; }
+  .act-btn i { font-size:16px; }
+  .act-btn:hover { background:var(--surface); color:var(--text-primary); }
+  .act-btn.danger:hover  { background:var(--red-light);    color:var(--red-dark);    }
+  .act-btn.success:hover { background:var(--accent-light); color:var(--accent-dark); }
+  .spacer { flex:1; }
+
+  /* ── Retailer detail header ── */
+  .retailer-detail-header {
+    display:flex; align-items:center; gap:16px;
+    padding:16px 18px;
+    background:var(--chrome); border:0.5px solid var(--border); border-radius:14px;
+    margin-bottom:20px;
+  }
+  .retailer-detail-header .rdh-logo { width:56px; height:56px; flex-shrink:0; }
+  .rdh-name { font-weight:600; font-size:18px; color:var(--text-primary); }
+  .rdh-link { font-size:13px; color:var(--accent); display:flex; align-items:center; gap:4px; text-decoration:none; font-weight:500; margin-top:4px; }
+  .rdh-link:hover { text-decoration:underline; }
+  .rdh-stats { margin-left:auto; text-align:right; }
+  .rdh-count { font-size:24px; font-weight:700; color:var(--text-primary); line-height:1; }
+  .rdh-label { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+  /* ── Empty state ── */
+  .empty-state { text-align:center; padding:48px 20px; color:var(--text-muted); }
+  .empty-state i { font-size:36px; display:block; margin-bottom:12px; }
+  .empty-state .em-title { font-size:15px; color:var(--text-secondary); font-weight:500; margin-bottom:5px; }
+  .empty-state .em-sub { font-size:13px; }
+
+  /* ── Modal ── */
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:200; padding:16px; }
+  .modal { background:var(--chrome); border-radius:16px; width:100%; max-width:540px; padding:22px 24px; max-height:92vh; display:flex; flex-direction:column; gap:16px; box-shadow:0 12px 40px rgba(0,0,0,0.22); }
+  .modal-header { display:flex; justify-content:space-between; align-items:center; }
+  .modal-title { font-weight:600; font-size:16px; color:var(--text-primary); }
+  .modal-close { background:none; border:none; cursor:pointer; padding:4px; border-radius:6px; color:var(--text-secondary); display:flex; }
+  .modal-close:hover { background:var(--surface); }
+  .modal-close i { font-size:19px; }
+  .modal-body { overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding-right:4px; }
+
+  /* ── Form ── */
+  .upload-zone { border:1.5px dashed var(--border-hover); border-radius:10px; padding:22px; text-align:center; cursor:pointer; background:var(--surface); transition:border-color 0.15s,background 0.15s; }
+  .upload-zone:hover,.upload-zone.drag-over { border-color:var(--accent); background:var(--accent-light); }
+  .upload-zone i { font-size:28px; color:var(--text-muted); display:block; margin-bottom:7px; }
+  .upload-zone .uz-main { font-size:13px; color:var(--text-secondary); font-weight:500; }
+  .upload-zone .uz-sub  { font-size:11px; color:var(--text-muted); margin-top:3px; }
+  .upload-preview { padding:8px; position:relative; }
+  .upload-preview img { max-width:100%; max-height:170px; border-radius:8px; object-fit:contain; display:block; margin:0 auto; }
+  .remove-img { position:absolute; top:4px; right:4px; background:var(--red); color:#fff; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; line-height:1; }
+  .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .form-field { display:flex; flex-direction:column; gap:4px; }
+  .form-label { font-size:12px; font-weight:500; color:var(--text-secondary); }
+  .form-input { width:100%; padding:8px 11px; border:0.5px solid var(--border-hover); border-radius:var(--radius-sm); font-size:14px; background:var(--input-bg); color:var(--text-primary); outline:none; transition:border-color 0.15s; }
+  .form-input:focus { border-color:var(--accent); }
+  textarea.form-input { resize:vertical; min-height:64px; }
+  select.form-input { cursor:pointer; }
+  .form-actions { display:flex; gap:10px; justify-content:flex-end; padding-top:4px; }
+  .btn-cancel { padding:8px 18px; border-radius:var(--radius-sm); border:0.5px solid var(--border-hover); background:none; cursor:pointer; font-size:14px; color:var(--text-secondary); }
+  .btn-cancel:hover { background:var(--surface); }
+  .btn-save { padding:8px 20px; border-radius:var(--radius-sm); border:none; background:var(--accent); color:#fff; font-weight:500; cursor:pointer; font-size:14px; transition:background 0.15s; }
+  .btn-save:hover { background:var(--accent-hover); }
+
+  /* ── AI Extract status ── */
+  .extract-banner { display:flex; align-items:center; gap:10px; padding:10px 13px; border-radius:9px; font-size:13px; }
+  .extract-banner.extracting { background:var(--accent-light); color:var(--accent-dark); }
+  .extract-banner.extract-ok { background:#E1F5EE; color:#085041; }
+  .extract-banner.extract-err { background:var(--red-light); color:var(--red-dark); }
+  .extract-banner i { font-size:16px; flex-shrink:0; }
+  .extract-spin { animation: spin 1s linear infinite; display:inline-block; }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .field-ai-filled { background: var(--accent-light) !important; border-color: var(--accent) !important; transition: background 0.4s; }
+
+  /* ── Barcode scan modal ── */
+  .barcode-modal-inner { background:var(--chrome); border-radius:16px; width:100%; max-width:400px; padding:24px; display:flex; flex-direction:column; align-items:center; gap:16px; box-shadow:0 12px 40px rgba(0,0,0,0.22); }
+  .barcode-canvas-wrap { background:#fff; padding:16px 24px 8px; border-radius:10px; border:1.5px solid var(--border-hover); width:100%; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .barcode-canvas-wrap canvas { max-width:100%; }
+  .barcode-val { font-family:'SF Mono','Fira Code',monospace; font-size:14px; color:var(--text-secondary); letter-spacing:0.08em; }
+  .barcode-tip { font-size:12px; color:var(--text-muted); text-align:center; }
+
+  /* ── barcode btn style ── */
+  .barcode-btn { color:var(--accent) !important; font-weight:500; }
+  .barcode-btn:hover { background:var(--accent-light) !important; }
+
+  /* ── Image modal ── */
+  .img-view img { max-width:100%; border-radius:10px; object-fit:contain; max-height:440px; display:block; margin:0 auto; }
+  .img-code { font-family:'SF Mono','Fira Code',monospace; text-align:center; font-size:16px; font-weight:600; background:var(--surface); border-radius:var(--radius-sm); padding:8px 12px; color:var(--text-primary); }
+
+  /* ── Use Coupon modal extras ── */
+  .use-modal .modal-header { align-items:flex-start; }
+  #useModalPhotoBtn, #useModalBarcodeBtn { transition: opacity 0.15s; }
+  #useModalPhotoBtn:hover { opacity:0.85; }
+  #useModalBarcodeBtn:hover { opacity:0.85; }
+
+  /* ── Toast ── */
+  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text-primary); color:var(--page); padding:10px 18px; border-radius:8px; font-size:13px; font-weight:500; z-index:999; transition:transform 0.25s ease,opacity 0.25s ease; opacity:0; pointer-events:none; white-space:nowrap; }
+  #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+  /* ── Appearance panel ── */
+  #appearBtn { position:fixed; bottom:24px; right:24px; z-index:100; width:46px; height:46px; border-radius:50%; background:var(--accent); color:#fff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 12px rgba(0,0,0,0.22); transition:background 0.15s,transform 0.15s; }
+  #appearBtn:hover { background:var(--accent-hover); transform:scale(1.07); }
+  #appearBtn i { font-size:20px; }
+  #appearPanel { position:fixed; right:0; top:0; bottom:0; z-index:300; width:300px; background:var(--chrome); border-left:0.5px solid var(--border); box-shadow:-6px 0 32px rgba(0,0,0,0.16); display:flex; flex-direction:column; transform:translateX(100%); transition:transform 0.28s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; }
+  #appearPanel.open { transform:translateX(0); }
+  .ap-header { display:flex; align-items:center; justify-content:space-between; padding:18px 20px 14px; border-bottom:0.5px solid var(--border); flex-shrink:0; }
+  .ap-header span { font-weight:600; font-size:15px; color:var(--text-primary); }
+  .ap-close { background:none; border:none; cursor:pointer; color:var(--text-secondary); padding:4px; border-radius:6px; display:flex; }
+  .ap-close:hover { background:var(--surface); }
+  .ap-close i { font-size:18px; }
+  .ap-section { padding:18px 20px; border-bottom:0.5px solid var(--border); }
+  .ap-section:last-of-type { border-bottom:none; }
+  .ap-section-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px; }
+  .bg-swatches { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .bg-swatch { border-radius:10px; height:56px; cursor:pointer; border:2px solid transparent; display:flex; align-items:flex-end; padding:5px 7px; transition:border-color 0.15s,transform 0.12s; }
+  .bg-swatch:hover { transform:scale(1.04); }
+  .bg-swatch.selected { border-color:var(--accent); }
+  .bg-swatch span { font-size:10px; font-weight:500; line-height:1.2; }
+  .bg-sand-s  { background:linear-gradient(135deg,#f5f4f0,#e8e6e0); } .bg-sand-s span  { color:#5F5E5A; }
+  .bg-white-s { background:linear-gradient(135deg,#ffffff,#f0f0f0); } .bg-white-s span { color:#666; }
+  .bg-slate-s { background:linear-gradient(135deg,#1e2027,#2d3140); } .bg-slate-s span { color:#9ea3b0; }
+  .bg-forest-s{ background:linear-gradient(135deg,#1a2420,#2a3d34); } .bg-forest-s span{ color:#7aaa88; }
+  .bg-ocean-s { background:linear-gradient(135deg,#0f1e2e,#1a3550); } .bg-ocean-s span { color:#6895b8; }
+  .bg-cream-s { background:linear-gradient(135deg,#fdf6e3,#f5e8c0); } .bg-cream-s span { color:#7a6030; }
+  .accent-swatches { display:flex; flex-wrap:wrap; gap:8px; }
+  .accent-swatch { width:36px; height:36px; border-radius:50%; cursor:pointer; border:2.5px solid transparent; transition:transform 0.12s,border-color 0.15s; display:flex; align-items:center; justify-content:center; }
+  .accent-swatch:hover { transform:scale(1.12); }
+  .accent-swatch.selected { border-color:var(--text-primary); }
+  .accent-swatch i { font-size:14px; color:#fff; display:none; }
+  .accent-swatch.selected i { display:block; }
+  .as-teal{background:#1D9E75;} .as-indigo{background:#4F46E5;} .as-coral{background:#E05A2B;} .as-violet{background:#7C3AED;} .as-sky{background:#0284C7;} .as-rose{background:#E11D48;}
+  .tile-options { display:flex; flex-direction:column; gap:8px; }
+  .tile-opt { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; cursor:pointer; border:1.5px solid var(--border); background:var(--surface); transition:border-color 0.15s,background 0.15s; }
+  .tile-opt:hover { border-color:var(--border-hover); }
+  .tile-opt.selected { border-color:var(--accent); background:var(--accent-light); }
+  .tile-opt-preview { width:40px; height:28px; border-radius:5px; flex-shrink:0; background:var(--chrome); border:1px solid var(--border); position:relative; overflow:hidden; }
+  .tp-flat { border:none !important; background:var(--surface) !important; } .tp-flat::after { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent); }
+  .tp-bold::before { content:''; position:absolute; top:0; left:0; right:0; height:5px; background:var(--accent); }
+  .tp-outlined { border:1.5px solid var(--border-hover) !important; }
+  .tile-opt-info { flex:1; }
+  .tile-opt-name { font-size:13px; font-weight:500; color:var(--text-primary); }
+  .tile-opt-desc { font-size:11px; color:var(--text-muted); margin-top:1px; }
+  .tile-opt.selected .tile-opt-name { color:var(--accent-dark); }
+  .ap-reset { margin:16px 20px 20px; width:calc(100% - 40px); padding:9px; border-radius:var(--radius-sm); border:0.5px solid var(--border-hover); background:none; color:var(--text-secondary); font-size:13px; cursor:pointer; transition:background 0.15s; }
+  .ap-reset:hover { background:var(--surface); }
+
+  /* ── Responsive ── */
+  @media (max-width:600px) {
+    .header-inner { height:auto; flex-wrap:wrap; padding:10px 0; gap:8px; }
+    .search-wrap { max-width:none; }
+    .form-grid-2 { grid-template-columns:1fr; }
+    .coupon-grid { grid-template-columns:1fr; }
+    .summary-grid { grid-template-columns:repeat(2,1fr); }
+    .retailer-grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+    .nav-tab span { display:none; }
+    .nav-tab { padding:11px 12px; }
+    .main { padding:16px 14px 80px; }
+    .modal { padding:18px 16px; }
+    #appearPanel { width:100%; }
+    #appearBtn { bottom:16px; right:16px; }
+  }
+</style>
+</head>
+<body class="bg-sand accent-teal tile-default">
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo"><i class="ti ti-vault"></i><span class="logo-text">Coupon Vault</span></div>
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="searchInput" placeholder="Search coupons…" oninput="renderAll()" />
+    </div>
+    <button class="btn-add" onclick="openAdd()">
+      <span class="btn-add-icon"><i class="ti ti-plus"></i></span>
+      <span>Add coupon</span>
+    </button>
+  </div>
+</header>
+
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-tab active" id="tab-dashboard"   onclick="switchView('dashboard')"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></button>
+    <button class="nav-tab"        id="tab-byRetailer"  onclick="switchView('byRetailer')"><i class="ti ti-building-store"></i><span>By Retailer</span></button>
+    <button class="nav-tab"        id="tab-byType"      onclick="switchView('byType')"><i class="ti ti-tags"></i><span>By Type</span></button>
+    <button class="nav-tab"        id="tab-expired"     onclick="switchView('expired')"><i class="ti ti-calendar-off"></i><span>Expired</span><span class="tab-badge" id="expiredBadge" style="display:none">0</span></button>
+  </div>
+</nav>
+
+<main class="main" id="mainContent"></main>
+<div id="toast"></div>
+
+<!-- Appearance button -->
+<button id="appearBtn" onclick="toggleAppearPanel()" title="Appearance"><i class="ti ti-palette"></i></button>
+
+<!-- Appearance panel -->
+<div id="appearPanel">
+  <div class="ap-header"><span>Appearance</span><button class="ap-close" onclick="toggleAppearPanel()"><i class="ti ti-x"></i></button></div>
+  <div class="ap-section">
+    <div class="ap-section-label">Background</div>
+    <div class="bg-swatches">
+      <div class="bg-swatch bg-sand-s  selected" data-bg="sand"   onclick="setBg(this,'sand')">  <span>Warm Sand</span></div>
+      <div class="bg-swatch bg-white-s"           data-bg="white"  onclick="setBg(this,'white')"> <span>White</span></div>
+      <div class="bg-swatch bg-cream-s"           data-bg="cream"  onclick="setBg(this,'cream')"> <span>Cream</span></div>
+      <div class="bg-swatch bg-slate-s"           data-bg="slate"  onclick="setBg(this,'slate')"> <span>Slate</span></div>
+      <div class="bg-swatch bg-forest-s"          data-bg="forest" onclick="setBg(this,'forest')"><span>Forest</span></div>
+      <div class="bg-swatch bg-ocean-s"           data-bg="ocean"  onclick="setBg(this,'ocean')"> <span>Ocean</span></div>
+    </div>
+  </div>
+  <div class="ap-section">
+    <div class="ap-section-label">Accent color</div>
+    <div class="accent-swatches">
+      <div class="accent-swatch as-teal   selected" data-accent="teal"   onclick="setAccent(this,'teal')">  <i class="ti ti-check"></i></div>
+      <div class="accent-swatch as-indigo"           data-accent="indigo" onclick="setAccent(this,'indigo')"><i class="ti ti-check"></i></div>
+      <div class="accent-swatch as-coral"            data-accent="coral"  onclick="setAccent(this,'coral')"> <i class="ti ti-check"></i></div>
+      <div class="accent-swatch as-violet"           data-accent="violet" onclick="setAccent(this,'violet')"><i class="ti ti-check"></i></div>
+      <div class="accent-swatch as-sky"              data-accent="sky"    onclick="setAccent(this,'sky')">   <i class="ti ti-check"></i></div>
+      <div class="accent-swatch as-rose"             data-accent="rose"   onclick="setAccent(this,'rose')">  <i class="ti ti-check"></i></div>
+    </div>
+  </div>
+  <div class="ap-section">
+    <div class="ap-section-label">Tile style</div>
+    <div class="tile-options">
+      <div class="tile-opt selected" data-tile="default"  onclick="setTile(this,'default')"><div class="tile-opt-preview"></div><div class="tile-opt-info"><div class="tile-opt-name">Default</div><div class="tile-opt-desc">White card with border</div></div></div>
+      <div class="tile-opt"          data-tile="flat"     onclick="setTile(this,'flat')">   <div class="tile-opt-preview tp-flat"></div><div class="tile-opt-info"><div class="tile-opt-name">Flat</div><div class="tile-opt-desc">Borderless, left accent stripe</div></div></div>
+      <div class="tile-opt"          data-tile="bold"     onclick="setTile(this,'bold')">   <div class="tile-opt-preview tp-bold"></div><div class="tile-opt-info"><div class="tile-opt-name">Bold</div><div class="tile-opt-desc">Colored top strip</div></div></div>
+      <div class="tile-opt"          data-tile="outlined" onclick="setTile(this,'outlined')"><div class="tile-opt-preview tp-outlined"></div><div class="tile-opt-info"><div class="tile-opt-name">Outlined</div><div class="tile-opt-desc">Strong border, minimal</div></div></div>
+    </div>
+  </div>
+  <button class="ap-reset" onclick="resetAppearance()">Reset to defaults</button>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="overlay" id="formModal" style="display:none" onclick="overlayClose(event,'formModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="formModalTitle">Add coupon</span>
+      <button class="modal-close" onclick="closeModal('formModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div id="uploadDefault"><i class="ti ti-cloud-upload"></i><div class="uz-main">Drop an image or click to upload</div><div class="uz-sub">Screenshots, photos, or coupon images</div></div>
+        <div id="uploadPreview" class="upload-preview" style="display:none"><img id="previewImg" src="" alt="Coupon preview" /><button class="remove-img" onclick="removeImage(event)">×</button></div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none" onchange="handleFileInput(event)" />
+      <div class="form-grid-2">
+        <div class="form-field"><label class="form-label" for="fRetailer">Retailer *</label><input class="form-input" id="fRetailer" type="text" placeholder="e.g. Target, Amazon" /></div>
+        <div class="form-field"><label class="form-label" for="fType">Coupon type</label><select class="form-input" id="fType"></select></div>
+      </div>
+      <div class="form-field"><label class="form-label" for="fTitle">Title / offer *</label><input class="form-input" id="fTitle" type="text" placeholder="e.g. 20% off home goods" /></div>
+      <div class="form-field"><label class="form-label" for="fDesc">Description</label><textarea class="form-input" id="fDesc" placeholder="Any restrictions or details…"></textarea></div>
+      <div class="form-grid-2">
+        <div class="form-field"><label class="form-label" for="fCode">Coupon / promo code</label><input class="form-input" id="fCode" type="text" placeholder="e.g. SAVE20" /></div>
+        <div class="form-field"><label class="form-label" for="fExpiry">Expiration date</label><input class="form-input" id="fExpiry" type="date" /></div>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="fBarcode">Barcode / QR value <span style="font-weight:400;color:var(--text-muted)">(optional — for scanning at store)</span></label>
+        <input class="form-input" id="fBarcode" type="text" placeholder="Digits from barcode or QR code" />
+      </div>
+      <div class="form-field"><label class="form-label" for="fNotes">Notes</label><input class="form-input" id="fNotes" type="text" placeholder="In-store only, app required, etc." /></div>
+      <div id="extractStatus" style="display:none"></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="closeModal('formModal')">Cancel</button><button class="btn-save" onclick="submitForm()">Save coupon</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Image View Modal -->
+<div class="overlay" id="imgModal" style="display:none" onclick="overlayClose(event,'imgModal')">
+  <div class="modal img-view" onclick="event.stopPropagation()" style="max-width:480px">
+    <div class="modal-header"><span class="modal-title" id="imgModalTitle">Coupon image</span><button class="modal-close" onclick="closeModal('imgModal')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body"><img id="imgModalSrc" src="" alt="Full coupon" /><div class="img-code" id="imgModalCode" style="display:none"></div></div>
+  </div>
+</div>
+
+<!-- Use Coupon Modal -->
+<div class="overlay" id="useModal" style="display:none" onclick="overlayClose(event,'useModal')">
+  <div class="modal use-modal" onclick="event.stopPropagation()" style="max-width:480px">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+        <div id="useModalLogo" style="flex-shrink:0"></div>
+        <div style="min-width:0">
+          <div id="useModalRetailer" style="font-weight:700;font-size:16px;color:var(--text-primary);line-height:1.2"></div>
+          <div id="useModalStatus" style="margin-top:2px"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('useModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <!-- Offer headline -->
+      <div id="useModalTitle" style="font-size:20px;font-weight:700;color:var(--text-primary);line-height:1.3"></div>
+
+      <!-- Description -->
+      <div id="useModalDescWrap" style="display:none">
+        <div id="useModalDesc" style="font-size:14px;color:var(--text-secondary);line-height:1.6"></div>
+      </div>
+
+      <!-- Promo code — tap to copy -->
+      <div id="useModalCodeWrap" style="display:none">
+        <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Promo code</div>
+        <button id="useModalCodeBtn" onclick="copyCode()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--page);border:1.5px dashed var(--accent);border-radius:10px;cursor:pointer;gap:10px;">
+          <span id="useModalCode" style="font-family:'SF Mono','Fira Code',monospace;font-size:18px;font-weight:700;color:var(--text-primary);letter-spacing:0.08em"></span>
+          <span id="useModalCopyLabel" style="font-size:12px;font-weight:600;color:var(--accent);flex-shrink:0;display:flex;align-items:center;gap:4px"><i class="ti ti-copy" style="font-size:14px"></i>Tap to copy</span>
+        </button>
+      </div>
+
+      <!-- Expiry + type row -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span id="useModalExpiry" style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:4px"><i class="ti ti-calendar" style="font-size:13px"></i></span>
+        <span id="useModalType" style="font-size:12px;background:var(--surface);color:var(--text-secondary);padding:3px 8px;border-radius:6px;border:0.5px solid var(--border)"></span>
+      </div>
+
+      <!-- Notes -->
+      <div id="useModalNotesWrap" style="display:none">
+        <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px">Notes</div>
+        <div id="useModalNotes" style="font-size:13px;color:var(--text-secondary);background:var(--surface);padding:10px 12px;border-radius:8px;line-height:1.5"></div>
+      </div>
+
+      <!-- Photo + Barcode buttons -->
+      <div id="useModalActions" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="useModalPhotoBtn" onclick="viewImageFromUse()" style="display:none;flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border-hover);background:var(--surface);cursor:pointer;font-size:13px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;justify-content:center;gap:6px">
+          <i class="ti ti-photo" style="font-size:16px"></i>View coupon photo
+        </button>
+        <button id="useModalBarcodeBtn" onclick="showBarcodeFromUse()" style="display:none;flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--accent);background:var(--accent-light);cursor:pointer;font-size:13px;font-weight:600;color:var(--accent-dark);display:flex;align-items:center;justify-content:center;gap:6px">
+          <i class="ti ti-barcode" style="font-size:16px"></i>Show barcode
+        </button>
+      </div>
+
+      <!-- Mark actions -->
+      <div style="display:flex;gap:10px;border-top:0.5px solid var(--border);padding-top:14px">
+        <button id="useModalRedeem" onclick="redeemFromUse()" style="flex:1;padding:11px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px">
+          <i class="ti ti-circle-check" style="font-size:16px"></i>Mark as redeemed
+        </button>
+        <button id="useModalExpireBtn" onclick="expireFromUse()" style="padding:11px 14px;border-radius:10px;border:1.5px solid var(--border-hover);background:none;color:var(--text-secondary);cursor:pointer;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px">
+          <i class="ti ti-calendar-off" style="font-size:15px"></i>Expired
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Barcode Scan Modal -->
+<div class="overlay" id="barcodeModal" style="display:none" onclick="overlayClose(event,'barcodeModal')">
+  <div class="barcode-modal-inner" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+      <span style="font-weight:600;font-size:16px;color:var(--text-primary)">Scan at checkout</span>
+      <button class="modal-close" onclick="closeModal('barcodeModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="barcode-canvas-wrap">
+      <canvas id="barcodeCanvas"></canvas>
+      <div class="barcode-val" id="barcodeValDisplay"></div>
+    </div>
+    <div class="barcode-tip"><i class="ti ti-brightness-up" style="font-size:13px;vertical-align:-1px"></i> Increase screen brightness for easier scanning</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  BRAND LOGOS — inline SVG data URIs for top retailers
+//  No network request — always works offline & in sandbox
+// ═══════════════════════════════════════════════════════
+const BRAND_LOGOS = {
+  // Each value is a complete SVG as a data URI
+  // Colors taken from official brand guidelines
+
+  "target": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23CC0000'/><circle cx='50' cy='50' r='33' fill='white'/><circle cx='50' cy='50' r='17' fill='%23CC0000'/></svg>`,
+
+  "walmart": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230071CE'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='42' font-weight='900' fill='white' text-anchor='middle'>W</text></svg>`,
+
+  "amazon": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23FF9900'/><text x='50' y='58' font-family='Arial Black,sans-serif' font-size='38' font-weight='900' fill='%23232F3E' text-anchor='middle'>a</text><path d='M25 70 Q50 82 75 70' stroke='%23232F3E' stroke-width='4' fill='none' stroke-linecap='round'/></svg>`,
+
+  "starbucks": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2300704A'/><circle cx='50' cy='50' r='38' fill='none' stroke='white' stroke-width='3'/><text x='50' y='58' font-family='Arial,sans-serif' font-size='28' font-weight='700' fill='white' text-anchor='middle'>★</text></svg>`,
+
+  "cvs": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23CC0000'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='34' font-weight='900' fill='white' text-anchor='middle'>CVS</text></svg>`,
+
+  "walgreens": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23E31837'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>WAL</text></svg>`,
+
+  "nike": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23111111'/><path d='M15 58 Q45 30 85 38 Q65 50 15 58Z' fill='white'/></svg>`,
+
+  "adidas": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23000000'/><polygon points='50,18 80,72 20,72' fill='none' stroke='white' stroke-width='8' stroke-linejoin='round'/><line x1='35' y1='72' x2='65' y2='72' stroke='white' stroke-width='8'/></svg>`,
+
+  "apple": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23555555'/><path d='M62 22 Q64 14 56 10 Q54 18 62 22Z M50 26 C36 26 28 38 28 52 C28 68 38 82 50 82 C56 82 60 78 66 78 C72 78 76 82 82 82 C82 68 72 56 72 52 C72 38 60 26 50 26Z' fill='white'/></svg>`,
+
+  "best buy": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%231F49A3'/><text x='50' y='56' font-family='Arial Black,sans-serif' font-size='18' font-weight='900' fill='%23FFD700' text-anchor='middle'>BEST</text><text x='50' y='76' font-family='Arial Black,sans-serif' font-size='18' font-weight='900' fill='white' text-anchor='middle'>BUY</text></svg>`,
+
+  "home depot": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23F96302'/><text x='50' y='60' font-family='Arial Black,sans-serif' font-size='36' font-weight='900' fill='white' text-anchor='middle'>HD</text></svg>`,
+
+  "lowes": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23004990'/><text x='50' y='64' font-family='Arial Black,sans-serif' font-size='30' font-weight='900' fill='white' text-anchor='middle'>LOWE'S</text></svg>`,
+
+  "ikea": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230058A3'/><rect x='8' y='30' width='84' height='40' rx='6' fill='%23FFDA1A'/><text x='50' y='58' font-family='Arial Black,sans-serif' font-size='26' font-weight='900' fill='%230058A3' text-anchor='middle'>IKEA</text></svg>`,
+
+  "costco": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230055A5'/><text x='50' y='58' font-family='Arial Black,sans-serif' font-size='20' font-weight='900' fill='white' text-anchor='middle'>COSTCO</text></svg>`,
+
+  "whole foods": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2300674B'/><text x='50' y='46' font-family='Arial,sans-serif' font-size='16' font-weight='700' fill='white' text-anchor='middle'>WHOLE</text><text x='50' y='66' font-family='Arial,sans-serif' font-size='16' font-weight='700' fill='white' text-anchor='middle'>FOODS</text></svg>`,
+
+  "trader joes": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23C8102E'/><text x='50' y='46' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'>TRADER</text><text x='50' y='63' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'>JOE'S</text></svg>`,
+
+  "kroger": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23003087'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>KROGER</text></svg>`,
+
+  "publix": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23007A3D'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>PUBLIX</text></svg>`,
+
+  "mcdonalds": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23DA291C'/><path d='M20 75 L20 35 Q20 25 30 25 Q40 25 40 35 L40 55 Q50 35 50 35 Q50 35 60 55 L60 35 Q60 25 70 25 Q80 25 80 35 L80 75 L68 75 L68 48 L52 75 L48 75 L32 48 L32 75Z' fill='%23FFC72C'/></svg>`,
+
+  "chipotle": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23441500'/><text x='50' y='58' font-family='Arial Black,sans-serif' font-size='18' font-weight='900' fill='%23DA291C' text-anchor='middle'>CHIPOTLE</text></svg>`,
+
+  "subway": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23009B48'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='22' font-weight='900' fill='%23FFC422' text-anchor='middle'>SUBway</text></svg>`,
+
+  "panera": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23A2231D'/><text x='50' y='56' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'>PANERA</text><text x='50' y='73' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'>BREAD</text></svg>`,
+
+  "dunkin": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23FF6E00'/><text x='50' y='56' font-family='Arial Black,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>DUNKIN'</text><circle cx='50' cy='73' r='8' fill='%23D52B1E'/></svg>`,
+
+  "sephora": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23000000'/><text x='50' y='60' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle' letter-spacing='2'>SEPHORA</text></svg>`,
+
+  "ulta": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23000000'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='26' font-weight='900' fill='%23E0366A' text-anchor='middle'>ULTA</text></svg>`,
+
+  "doordash": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23FF3008'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>DoorDash</text></svg>`,
+
+  "instacart": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%2343B02A'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='14' font-weight='900' fill='white' text-anchor='middle'>instacart</text></svg>`,
+
+  "ebay": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='white'/><text x='18' y='62' font-family='Arial Black,sans-serif' font-size='36' font-weight='900' fill='%23E53238'>e</text><text x='38' y='62' font-family='Arial Black,sans-serif' font-size='36' font-weight='900' fill='%23F5AF02'>b</text><text x='57' y='62' font-family='Arial Black,sans-serif' font-size='36' font-weight='900' fill='%2386B817'>a</text><text x='74' y='62' font-family='Arial Black,sans-serif' font-size='36' font-weight='900' fill='%230064D2'>y</text></svg>`,
+
+  "nordstrom": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23000000'/><text x='50' y='62' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle' letter-spacing='1'>NORDSTROM</text></svg>`,
+
+  "macys": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23E31837'/><text x='50' y='56' font-family='Arial,sans-serif' font-size='28' font-weight='700' fill='white' text-anchor='middle'>macy's</text></svg>`,
+
+  "kohls": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23004C97'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>KOHL'S</text></svg>`,
+
+  "gap": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230B3080'/><text x='50' y='64' font-family='Arial Black,sans-serif' font-size='40' font-weight='900' fill='white' text-anchor='middle'>GAP</text></svg>`,
+
+  "old navy": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23000080'/><text x='50' y='50' font-family='Arial Black,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>OLD</text><text x='50' y='70' font-family='Arial Black,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>NAVY</text></svg>`,
+
+  "lululemon": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23CC0033'/><text x='50' y='62' font-family='Arial,sans-serif' font-size='34' font-weight='700' fill='white' text-anchor='middle'>lulu</text></svg>`,
+
+  "petco": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23003087'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='26' font-weight='900' fill='white' text-anchor='middle'>PETCO</text></svg>`,
+
+  "petsmart": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230060A9'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='20' font-weight='900' fill='white' text-anchor='middle'>PetSmart</text></svg>`,
+
+  "aldi": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230055A2'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='30' font-weight='900' fill='white' text-anchor='middle'>ALDI</text></svg>`,
+
+  "safeway": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23CC0000'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='20' font-weight='900' fill='white' text-anchor='middle'>SAFEWAY</text></svg>`,
+
+  "rei": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23005238'/><text x='50' y='64' font-family='Arial Black,sans-serif' font-size='38' font-weight='900' fill='white' text-anchor='middle'>REI</text></svg>`,
+
+  "under armour": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%231D1D1B'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='34' font-weight='900' fill='%23C8102E' text-anchor='middle'>UA</text></svg>`,
+
+  "five below": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23A50034'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='22' font-weight='900' fill='white' text-anchor='middle'>five below</text></svg>`,
+
+  "dollar tree": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23006400'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='20' font-weight='900' fill='%23FFD700' text-anchor='middle'>DOLLAR TREE</text></svg>`,
+
+  "wayfair": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%238B5CF6'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='20' font-weight='900' fill='white' text-anchor='middle'>Wayfair</text></svg>`,
+
+  "zara": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23000000'/><text x='50' y='62' font-family='Arial,sans-serif' font-size='28' font-weight='700' fill='white' text-anchor='middle' letter-spacing='3'>ZARA</text></svg>`,
+
+  "hm": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23CC0000'/><text x='50' y='64' font-family='Arial Black,sans-serif' font-size='38' font-weight='900' fill='white' text-anchor='middle'>H%26M</text></svg>`,
+
+  "michaels": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230072CE'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='20' font-weight='900' fill='white' text-anchor='middle'>Michaels</text></svg>`,
+
+  "sprouts": `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%2348A23F'/><text x='50' y='62' font-family='Arial Black,sans-serif' font-size='20' font-weight='900' fill='white' text-anchor='middle'>Sprouts</text></svg>`,
+};
+
+// Alternate keys (aliases → canonical)
+const BRAND_ALIASES = {
+  "mcdonald's":"mcdonalds","trader joe's":"trader joes","whole foods market":"whole foods",
+  "cvs pharmacy":"cvs","lowe's":"lowes","kohl's":"kohls","macy's":"macys",
+  "panera bread":"panera","dunkin donuts":"dunkin","dunkin'":"dunkin",
+  "h&m":"hm","the home depot":"home depot","ulta beauty":"ulta",
+  "sprouts farmers market":"sprouts","wendy's":"wendys",
+};
+
+function getBrandLogo(name) {
+  if (!name) return null;
+  const key = name.trim().toLowerCase();
+  const canonical = BRAND_ALIASES[key] || key;
+  return BRAND_LOGOS[canonical] || null;
+}
+
+// ══ Brand colors for initials fallback ══
+const BRAND_COLORS = {
+  "target":"#CC0000","walmart":"#0071CE","amazon":"#FF9900","starbucks":"#00704A",
+  "cvs":"#CC0000","walgreens":"#E31837","nike":"#111111","adidas":"#000000",
+  "apple":"#555555","best buy":"#1F49A3","home depot":"#F96302","lowes":"#004990",
+  "ikea":"#0058A3","costco":"#0055A5","whole foods":"#00674B","trader joes":"#C8102E",
+  "kroger":"#003087","publix":"#007A3D","mcdonalds":"#DA291C","chipotle":"#441500",
+  "subway":"#009B48","panera":"#A2231D","dunkin":"#FF6E00","sephora":"#000000",
+  "ulta":"#000000","doordash":"#FF3008","instacart":"#43B02A","ebay":"#E53238",
+  "nordstrom":"#000000","macys":"#E31837","kohls":"#004C97","gap":"#0B3080",
+  "old navy":"#000080","lululemon":"#CC0033","petco":"#003087","petsmart":"#0060A9",
+  "aldi":"#0055A2","safeway":"#CC0000","rei":"#005238","under armour":"#1D1D1B",
+  "zara":"#000000","hm":"#CC0000","wayfair":"#8B5CF6","michaels":"#0072CE",
+  "five below":"#A50034","dollar tree":"#006400","sprouts":"#48A23F",
+};
+
+function getBrandColor(name) {
+  if (!name) return null;
+  const key = name.trim().toLowerCase();
+  const canonical = BRAND_ALIASES[key] || key;
+  return BRAND_COLORS[canonical] || null;
+}
+
+// Fallback palette for unknown brands
+const FALLBACK_COLORS = ["#534AB7","#1D9E75","#D85A30","#D4537E","#185FA5","#639922","#BA7517","#E24B4A","#0F6E56","#993C1D"];
+
+function getInitialsColor(name) {
+  const brandColor = getBrandColor(name);
+  if (brandColor) return brandColor;
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+  return FALLBACK_COLORS[Math.abs(h) % FALLBACK_COLORS.length];
+}
+
+function getInitials(name) {
+  if (!name) return "?";
+  const words = name.trim().split(/\s+/).filter(w => w.length > 0);
+  return words.length === 1 ? words[0].slice(0, 2).toUpperCase() : (words[0][0] + words[1][0]).toUpperCase();
+}
+
+// Create a logo element — uses inline SVG if brand known, initials otherwise
+function createLogoEl(retailerName, size) {
+  const isLg = size === 'lg';
+  const container = document.createElement('div');
+
+  if (isLg) {
+    // Large: fills .rt-logo-area (100% width, 90px height)
+    container.className = 'logo-avatar sz-lg';
+  } else {
+    // Small: 40x40 inline in card header
+    container.className = 'logo-avatar sz-sm';
+  }
+
+  const svgSrc = getBrandLogo(retailerName);
+
+  if (svgSrc) {
+    // Use our inline SVG — guaranteed to work everywhere, no network
+    const img = document.createElement('img');
+    img.src = svgSrc;
+    img.alt = retailerName + ' logo';
+    if (isLg) { img.style.width = '64px'; img.style.height = '64px'; }
+    else       { img.style.width = '30px'; img.style.height = '30px'; }
+    img.style.objectFit = 'contain';
+    container.appendChild(img);
+  } else {
+    // Initials fallback with brand color (or hashed color)
+    const color = getInitialsColor(retailerName);
+    const initials = getInitials(retailerName);
+    const fs = isLg ? 26 : 14;
+    container.style.background = color;
+    container.style.border = 'none';
+    const span = document.createElement('div');
+    span.className = 'logo-initials';
+    span.style.fontSize = fs + 'px';
+    span.textContent = initials;
+    container.appendChild(span);
+  }
+
+  return container;
+}
+
+function attachLogos() {
+  document.querySelectorAll('[data-logo]').forEach(el => {
+    const name = el.dataset.logo;
+    const size = el.dataset.size || 'sm';
+    el.innerHTML = '';
+    el.appendChild(createLogoEl(name, size));
+  });
+}
+
+// ══ THEME SYSTEM ══
+const STORAGE_KEY = "couponvault_v1";
+const THEME_KEY   = "couponvault_theme_v1";
+const COUPON_TYPES = ["Grocery","Clothing","Restaurant","Beauty","Home","Electronics","Pharmacy","Online Promo Code","In-Store Coupon","Free Item","Percentage Off","Dollar Amount Off","Other"];
+
+let theme = { bg:'sand', accent:'teal', tile:'default' };
+const BG_CLS     = ['bg-sand','bg-white','bg-slate','bg-forest','bg-ocean','bg-cream'];
+const ACCENT_CLS = ['accent-teal','accent-indigo','accent-coral','accent-violet','accent-sky','accent-rose'];
+const TILE_CLS   = ['tile-default','tile-flat','tile-bold','tile-outlined'];
+
+function loadTheme() { try { const t = localStorage.getItem(THEME_KEY); if(t) theme = {...theme,...JSON.parse(t)}; } catch(e){} }
+function saveTheme() { try { localStorage.setItem(THEME_KEY, JSON.stringify(theme)); } catch(e){} }
+function applyTheme() {
+  const b = document.body;
+  [...BG_CLS, ...ACCENT_CLS, ...TILE_CLS].forEach(c => b.classList.remove(c));
+  b.classList.add('bg-'+theme.bg, 'accent-'+theme.accent, 'tile-'+theme.tile);
+  document.querySelectorAll('.bg-swatch').forEach(el => el.classList.toggle('selected', el.dataset.bg === theme.bg));
+  document.querySelectorAll('.accent-swatch').forEach(el => el.classList.toggle('selected', el.dataset.accent === theme.accent));
+  document.querySelectorAll('.tile-opt').forEach(el => el.classList.toggle('selected', el.dataset.tile === theme.tile));
+}
+function setBg(el,v)     { theme.bg=v;     saveTheme(); applyTheme(); }
+function setAccent(el,v) { theme.accent=v; saveTheme(); applyTheme(); }
+function setTile(el,v)   { theme.tile=v;   saveTheme(); applyTheme(); }
+function resetAppearance() { theme={bg:'sand',accent:'teal',tile:'default'}; saveTheme(); applyTheme(); showToast('Reset to defaults'); }
+function toggleAppearPanel() { document.getElementById('appearPanel').classList.toggle('open'); }
+
+// ══ DATA ══
+function dayOffset(n) { const d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().split("T")[0]; }
+const SAMPLE = [
+  {id:"s1",retailerName:"Target",couponTitle:"20% off home goods",description:"Excludes furniture.",couponCode:"TARGET20",couponType:"Percentage Off",expirationDate:dayOffset(3),imageUrl:"",notes:"In-store and online",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+  {id:"s2",retailerName:"Starbucks",couponTitle:"Buy one get one free",description:"Grande or larger.",couponCode:"BOGO2024",couponType:"Free Item",expirationDate:dayOffset(14),imageUrl:"",notes:"Mobile app only",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+  {id:"s3",retailerName:"CVS",couponTitle:"$5 off $25 purchase",description:"Health and beauty items.",couponCode:"",couponType:"Dollar Amount Off",expirationDate:dayOffset(-2),imageUrl:"",notes:"Print or show on phone",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+  {id:"s4",retailerName:"Nike",couponTitle:"15% off full price items",description:"Excludes sale items.",couponCode:"NIKE15OFF",couponType:"Percentage Off",expirationDate:dayOffset(30),imageUrl:"",notes:"Online only",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+  {id:"s5",retailerName:"Target",couponTitle:"Free $10 gift card with $50 grocery",description:"One per household.",couponCode:"",couponType:"Free Item",expirationDate:dayOffset(1),imageUrl:"",notes:"In-store only",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+  {id:"s6",retailerName:"Whole Foods",couponTitle:"$3 off organic produce",description:"Prime members only.",couponCode:"PRIME3",couponType:"Dollar Amount Off",expirationDate:dayOffset(7),imageUrl:"",notes:"Amazon Prime required",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+  {id:"s7",retailerName:"Nike",couponTitle:"Free shipping on orders $50+",description:"No code needed.",couponCode:"",couponType:"Online Promo Code",expirationDate:dayOffset(20),imageUrl:"",notes:"",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+  {id:"s8",retailerName:"Starbucks",couponTitle:"Double stars Tuesday",description:"Earn 2x stars on any purchase.",couponCode:"DBLSTAR",couponType:"Other",expirationDate:dayOffset(5),imageUrl:"",notes:"App required",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isRedeemed:false},
+];
+function loadData() { try { const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):null; } catch(e) { return null; } }
+function saveData(c) { try { localStorage.setItem(STORAGE_KEY,JSON.stringify(c)); } catch(e) {} }
+
+let coupons = loadData() || SAMPLE;
+let currentView = "dashboard", retailerDrilldown = null;
+let editingId = null, currentImageData = "";
+let sortBy = "expiration", filterType = "all";
+
+// ══ STATUS ══
+function daysUntil(d) { if(!d)return null; const n=new Date();n.setHours(0,0,0,0); return Math.round((new Date(d+"T00:00:00")-n)/86400000); }
+function computeStatus(c) { if(c.isRedeemed)return"redeemed"; const d=daysUntil(c.expirationDate); if(d===null)return"active"; if(d<0)return"expired"; if(d<=7)return"expiringSoon"; return"active"; }
+function statusLabel(status,exp) { const d=daysUntil(exp); if(status==="redeemed")return"Redeemed"; if(status==="expired")return"Expired"; if(status==="expiringSoon"){if(d===0)return"Expires today!";if(d===1)return"Expires tomorrow";return d+" days left";} if(d!==null)return d+"d left"; return"Active"; }
+function refreshStatuses() { coupons=coupons.map(c=>({...c,status:computeStatus(c)})); }
+
+// ══ RENDER ══
+function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function badgeClass(s){return{active:"badge-active",expiringSoon:"badge-soon",expired:"badge-expired",redeemed:"badge-redeemed"}[s]||"badge-active";}
+function cardClass(s){return{expiringSoon:"card-soon",expired:"card-expired",redeemed:"card-redeemed"}[s]||"";}
+
+function couponCardHTML(c) {
+  const status=computeStatus(c),label=statusLabel(status,c.expirationDate),dateText=c.expirationDate?"Exp. "+c.expirationDate:"No expiry";
+  const codeHTML=c.couponCode?`<div class="card-code"><i class="ti ti-ticket" aria-hidden="true"></i><span>${esc(c.couponCode)}</span></div>`:"";
+  const barcodeBtn=c.barcodeValue?`<button class="act-btn barcode-btn" onclick="showBarcode('${esc(c.id)}')" title="Show scannable barcode"><i class="ti ti-barcode"></i><span style="font-size:11px;margin-left:3px">Scan</span></button>`:"";
+  const viewBtn=c.imageUrl?`<button class="act-btn" onclick="viewImage('${esc(c.id)}')" title="View image"><i class="ti ti-photo"></i></button>`:"";
+  const redBtn=(status!=="redeemed"&&status!=="expired")?`<button class="act-btn success" onclick="markRedeemed('${esc(c.id)}')" title="Mark redeemed"><i class="ti ti-circle-check"></i></button>`:"";
+  const expBtn=(status!=="expired"&&status!=="redeemed")?`<button class="act-btn" onclick="markExpired('${esc(c.id)}')" title="Mark expired"><i class="ti ti-calendar-off"></i></button>`:"";
+  return `<div class="coupon-card ${cardClass(status)}" data-id="${esc(c.id)}" onclick="openUseCoupon('${esc(c.id)}')" style="cursor:pointer;">
+  <div class="card-top">
+    <div class="card-top-left">
+      <div data-logo="${esc(c.retailerName)}" data-size="sm"></div>
+      <div class="card-meta">
+        <div class="card-retailer">${esc(c.retailerName)}</div>
+        <div class="card-title">${esc(c.couponTitle)}</div>
+      </div>
+    </div>
+    <span class="badge ${badgeClass(status)}">${esc(label)}</span>
+  </div>
+  ${codeHTML}
+  <div class="card-footer">
+    <span class="type-badge">${esc(c.couponType)}</span>
+    <span class="card-date">${esc(dateText)}</span>
+  </div>
+  <div class="card-actions" onclick="event.stopPropagation()">
+    <button class="act-btn" onclick="openEdit('${esc(c.id)}')" title="Edit"><i class="ti ti-edit"></i></button>
+    ${redBtn}${expBtn}
+    <div class="spacer"></div>
+    <button class="act-btn danger" onclick="deleteCoupon('${esc(c.id)}')" title="Delete"><i class="ti ti-trash"></i></button>
+  </div>
+</div>`;
+}
+
+function retailerTileHTML(name, list) {
+  const soon=list.filter(c=>computeStatus(c)==="expiringSoon").length;
+  const soonBadge=soon>0?`<span class="rt-soon">${soon} soon</span>`:"";
+  return `<div class="retailer-tile" title="${esc(name)}" onclick="drillRetailer('${esc(name)}')">
+  <div class="rt-logo-area">
+    <div class="rt-name">${esc(name)}</div>
+    <div data-logo="${esc(name)}" data-size="lg" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+  </div>
+  <div class="rt-body">
+    <span class="rt-count">${list.length} coupon${list.length!==1?"s":""}</span>
+    ${soonBadge}
+  </div>
+</div>`;
+}
+
+function shHTML(label,count,icon){return`<div class="section-header"><i class="ti ti-${esc(icon)}" aria-hidden="true"></i><span class="sh-label">${esc(label)}</span><span class="sh-count">(${count})</span></div>`;}
+function emptyHTML(icon,t,s){return`<div class="empty-state"><i class="ti ti-${esc(icon)}" aria-hidden="true"></i><div class="em-title">${esc(t)}</div><div class="em-sub">${esc(s)}</div></div>`;}
+
+function getFiltered(src){const q=(document.getElementById("searchInput")?.value||"").toLowerCase().trim();return src.filter(c=>{if(filterType!=="all"&&c.couponType!==filterType)return false;if(q){const h=(c.retailerName+" "+c.couponTitle+" "+(c.couponCode||"")).toLowerCase();if(!h.includes(q))return false;}return true;});}
+function getSorted(src){return[...src].sort((a,b)=>{if(sortBy==="expiration"){if(!a.expirationDate)return 1;if(!b.expirationDate)return-1;return a.expirationDate.localeCompare(b.expirationDate);}if(sortBy==="retailer")return a.retailerName.localeCompare(b.retailerName);if(sortBy==="newest")return b.createdAt.localeCompare(a.createdAt);return 0;});}
+
+function renderAll() {
+  refreshStatuses(); saveData(coupons);
+  const active=coupons.filter(c=>["active","expiringSoon"].includes(computeStatus(c)));
+  const soon=coupons.filter(c=>computeStatus(c)==="expiringSoon");
+  const expired=coupons.filter(c=>computeStatus(c)==="expired");
+  const redeemed=coupons.filter(c=>computeStatus(c)==="redeemed");
+  const expCount=expired.length+redeemed.length;
+  const eb=document.getElementById("expiredBadge");
+  eb.style.display=expCount>0?"inline":"none"; eb.textContent=expCount;
+  const allTypes=[...new Set(coupons.map(c=>c.couponType))].sort();
+  const filtersHTML=`<div class="filters">
+    <div class="filter-group"><i class="ti ti-arrows-sort" aria-hidden="true"></i><select class="filter-select" onchange="sortBy=this.value;renderAll()"><option value="expiration" ${sortBy==="expiration"?"selected":""}>Sort: Expiration</option><option value="retailer" ${sortBy==="retailer"?"selected":""}>Sort: Retailer A–Z</option><option value="newest" ${sortBy==="newest"?"selected":""}>Sort: Newest first</option></select></div>
+    <div class="filter-group"><i class="ti ti-filter" aria-hidden="true"></i><select class="filter-select" onchange="filterType=this.value;renderAll()"><option value="all" ${filterType==="all"?"selected":""}>All types</option>${allTypes.map(t=>`<option value="${esc(t)}" ${filterType===t?"selected":""}>${esc(t)}</option>`).join("")}</select></div>
+    <span class="filter-stat">${active.length} active · ${soon.length} expiring soon</span>
+  </div>`;
+
+  let body=filtersHTML;
+  const visActive=getSorted(getFiltered(active));
+
+  if(currentView==="dashboard"){
+    body+=`<div class="summary-grid"><div class="summary-card sc-active"><div class="s-label">Active</div><div class="s-value">${active.length}</div></div><div class="summary-card sc-soon"><div class="s-label">Expiring soon</div><div class="s-value">${soon.length}</div></div><div class="summary-card sc-expired"><div class="s-label">Expired</div><div class="s-value">${expired.length}</div></div><div class="summary-card sc-redeemed"><div class="s-label">Redeemed</div><div class="s-value">${redeemed.length}</div></div></div>`;
+    if(soon.length>0){const vs=getSorted(getFiltered(soon));body+=`<div class="section">${shHTML("Expiring soon",vs.length,"alarm")}<div class="coupon-grid">${vs.map(couponCardHTML).join("")}</div></div>`;}
+    body+=`<div class="section">${shHTML("All active coupons",visActive.length,"ticket")}${visActive.length===0?emptyHTML("ticket-off","No active coupons","Add your first coupon to get started"):`<div class="coupon-grid">${visActive.map(couponCardHTML).join("")}</div>`}</div>`;
+  }
+  else if(currentView==="byRetailer"&&!retailerDrilldown){
+    const groups={};active.forEach(c=>{if(!groups[c.retailerName])groups[c.retailerName]=[];groups[c.retailerName].push(c);});
+    const retailers=Object.keys(groups).sort();
+    body+=retailers.length===0?emptyHTML("building-store","No active coupons","Add coupons to see them grouped by retailer")
+      :`<div class="section">${shHTML("All retailers",retailers.length,"building-store")}<div class="retailer-grid">${retailers.map(r=>retailerTileHTML(r,groups[r])).join("")}</div></div>`;
+  }
+  else if(currentView==="byRetailer"&&retailerDrilldown){
+    const items=getSorted(getFiltered(active.filter(c=>c.retailerName===retailerDrilldown)));
+    const mapsUrl="https://www.google.com/maps/search/"+encodeURIComponent(retailerDrilldown+" near me");
+    body+=`<div class="breadcrumb"><button onclick="backToRetailers()"><i class="ti ti-arrow-left" style="font-size:13px;vertical-align:-1px"></i> All retailers</button><i class="ti ti-chevron-right"></i><span>${esc(retailerDrilldown)}</span></div>
+    <div class="section">
+      <div class="retailer-detail-header">
+        <div class="rdh-logo"><div data-logo="${esc(retailerDrilldown)}" data-size="sm" style="width:56px;height:56px;"></div></div>
+        <div><div class="rdh-name">${esc(retailerDrilldown)}</div><a class="rdh-link" href="${mapsUrl}" target="_blank" rel="noopener"><i class="ti ti-map-pin" style="font-size:13px"></i>Find nearby locations</a></div>
+        <div class="rdh-stats"><div class="rdh-count">${items.length}</div><div class="rdh-label">active coupon${items.length!==1?"s":""}</div></div>
+      </div>
+      ${items.length===0?emptyHTML("ticket-off","No coupons match your filters",""):`<div class="coupon-grid">${items.map(couponCardHTML).join("")}</div>`}
+    </div>`;
+  }
+  else if(currentView==="byType"){
+    const groups={};visActive.forEach(c=>{if(!groups[c.couponType])groups[c.couponType]=[];groups[c.couponType].push(c);});
+    const types=Object.keys(groups).sort();
+    body+=types.length===0?emptyHTML("tags","No active coupons","Add coupons to see them grouped by type"):types.map(t=>`<div class="section">${shHTML(t,groups[t].length,"tag")}<div class="coupon-grid">${groups[t].map(couponCardHTML).join("")}</div></div>`).join("");
+  }
+  else if(currentView==="expired"){
+    const ve=getSorted(getFiltered(expired)),vr=getSorted(getFiltered(redeemed));
+    if(!ve.length&&!vr.length){body+=emptyHTML("circle-check","Nothing here yet","Expired and redeemed coupons will appear here");}
+    else{if(ve.length)body+=`<div class="section">${shHTML("Expired",ve.length,"calendar-off")}<div class="coupon-grid">${ve.map(couponCardHTML).join("")}</div></div>`;if(vr.length)body+=`<div class="section">${shHTML("Redeemed",vr.length,"circle-check")}<div class="coupon-grid">${vr.map(couponCardHTML).join("")}</div></div>`;}
+  }
+
+  document.getElementById("mainContent").innerHTML=body;
+  attachLogos();
+}
+
+// ══ NAVIGATION ══
+function switchView(v){currentView=v;retailerDrilldown=null;document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("active"));document.getElementById("tab-"+v).classList.add("active");renderAll();}
+function drillRetailer(name){retailerDrilldown=name;renderAll();}
+function backToRetailers(){retailerDrilldown=null;renderAll();}
+
+// ══ CRUD ══
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function deleteCoupon(id){if(!confirm("Delete this coupon?"))return;coupons=coupons.filter(c=>c.id!==id);renderAll();showToast("Coupon deleted");}
+function markRedeemed(id){coupons=coupons.map(c=>c.id===id?{...c,isRedeemed:true,status:"redeemed",updatedAt:new Date().toISOString()}:c);renderAll();showToast("Marked as redeemed");}
+function markExpired(id){coupons=coupons.map(c=>c.id===id?{...c,status:"expired",expirationDate:c.expirationDate||dayOffset(0),updatedAt:new Date().toISOString()}:c);renderAll();showToast("Marked as expired");}
+function viewImage(id){const c=coupons.find(x=>x.id===id);if(!c||!c.imageUrl)return;document.getElementById("imgModalTitle").textContent=c.retailerName;document.getElementById("imgModalSrc").src=c.imageUrl;const ce=document.getElementById("imgModalCode");if(c.couponCode){ce.textContent=c.couponCode;ce.style.display="block";}else ce.style.display="none";document.getElementById("imgModal").style.display="flex";}
+
+// ══ FORM ══
+function populateTypeSelect(){document.getElementById("fType").innerHTML=COUPON_TYPES.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("");}
+function clearForm(){["fRetailer","fTitle","fDesc","fCode","fExpiry","fNotes","fBarcode"].forEach(id=>document.getElementById(id).value="");document.getElementById("fType").value="Other";clearImagePreview();currentImageData="";hideExtractStatus();}
+function openAdd(){editingId=null;populateTypeSelect();clearForm();document.getElementById("formModalTitle").textContent="Add coupon";document.getElementById("formModal").style.display="flex";}
+function openEdit(id){const c=coupons.find(x=>x.id===id);if(!c)return;editingId=id;populateTypeSelect();clearForm();document.getElementById("fRetailer").value=c.retailerName||"";document.getElementById("fTitle").value=c.couponTitle||"";document.getElementById("fDesc").value=c.description||"";document.getElementById("fCode").value=c.couponCode||"";document.getElementById("fExpiry").value=c.expirationDate||"";document.getElementById("fNotes").value=c.notes||"";document.getElementById("fBarcode").value=c.barcodeValue||"";document.getElementById("fType").value=c.couponType||"Other";if(c.imageUrl){currentImageData=c.imageUrl;showImagePreview(c.imageUrl);}document.getElementById("formModalTitle").textContent="Edit coupon";document.getElementById("formModal").style.display="flex";}
+function submitForm(){
+  const retailer=document.getElementById("fRetailer").value.trim(),title=document.getElementById("fTitle").value.trim();
+  if(!retailer){alert("Retailer name is required.");document.getElementById("fRetailer").focus();return;}
+  if(!title){alert("Coupon title / offer is required.");document.getElementById("fTitle").focus();return;}
+  const now=new Date().toISOString(),expiry=document.getElementById("fExpiry").value;
+  const c={id:editingId||newId(),retailerName:retailer,couponTitle:title,description:document.getElementById("fDesc").value.trim(),couponCode:document.getElementById("fCode").value.trim(),couponType:document.getElementById("fType").value,expirationDate:expiry,imageUrl:currentImageData,notes:document.getElementById("fNotes").value.trim(),barcodeValue:document.getElementById("fBarcode").value.trim(),createdAt:editingId?(coupons.find(x=>x.id===editingId)?.createdAt||now):now,updatedAt:now,reminderDate:expiry?dayOffset(-7):"",isRedeemed:editingId?(coupons.find(x=>x.id===editingId)?.isRedeemed||false):false,status:"active"};
+  c.status=computeStatus(c);
+  coupons=editingId?coupons.map(x=>x.id===editingId?c:x):[c,...coupons];
+  closeModal("formModal");renderAll();showToast(editingId?"Coupon updated":"Coupon saved");
+}
+
+// ══ IMAGE UPLOAD ══
+function handleFileInput(e){const f=e.target.files[0];if(f)processImage(f);}
+function handleDragOver(e){e.preventDefault();document.getElementById("uploadZone").classList.add("drag-over");}
+function handleDragLeave(){document.getElementById("uploadZone").classList.remove("drag-over");}
+function handleDrop(e){e.preventDefault();document.getElementById("uploadZone").classList.remove("drag-over");const f=e.dataTransfer.files[0];if(f&&f.type.startsWith("image/"))processImage(f);}
+function processImage(f){
+  const r=new FileReader();
+  r.onload=e=>{
+    currentImageData=e.target.result;
+    showImagePreview(currentImageData);
+    // Only auto-extract if form fields are empty (not editing)
+    const hasContent = document.getElementById('fRetailer').value.trim() || document.getElementById('fTitle').value.trim();
+    if (!hasContent) extractFromImage(currentImageData);
+  };
+  r.readAsDataURL(f);
+}
+function showImagePreview(src){document.getElementById("uploadDefault").style.display="none";document.getElementById("previewImg").src=src;document.getElementById("uploadPreview").style.display="block";}
+function clearImagePreview(){document.getElementById("uploadDefault").style.display="block";document.getElementById("uploadPreview").style.display="none";document.getElementById("previewImg").src="";document.getElementById("fileInput").value="";}
+function removeImage(e){e.stopPropagation();currentImageData="";clearImagePreview();}
+
+// ══ AI EXTRACTION ══
+function showExtractStatus(type, msg) {
+  const el = document.getElementById('extractStatus');
+  const icons = { extracting:'<i class="ti ti-sparkles extract-spin"></i>', ok:'<i class="ti ti-circle-check"></i>', err:'<i class="ti ti-alert-circle"></i>' };
+  el.innerHTML = `<div class="extract-banner ${type==='extracting'?'extracting':type==='ok'?'extract-ok':'extract-err'}">${icons[type]||''}<span>${msg}</span></div>`;
+  el.style.display = 'block';
+}
+function hideExtractStatus() {
+  const el = document.getElementById('extractStatus');
+  if (el) { el.style.display='none'; el.innerHTML=''; }
+}
+function highlightField(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('field-ai-filled');
+  setTimeout(() => el.classList.remove('field-ai-filled'), 2500);
+}
+
+async function extractFromImage(base64DataUrl) {
+  // Check if Anthropic API key is configured
+  const apiKey = window.ANTHROPIC_API_KEY || '';
+  if (!apiKey) {
+    showExtractStatus('extracting', 'Reading coupon… (add your API key to enable auto-fill)');
+    // Simulate a brief delay then show manual prompt
+    setTimeout(() => {
+      showExtractStatus('err', 'No API key set — fill fields manually or add window.ANTHROPIC_API_KEY to enable AI extraction');
+    }, 1500);
+    return;
+  }
+
+  showExtractStatus('extracting', 'Reading coupon image with AI…');
+
+  const base64 = base64DataUrl.split(',')[1];
+  const mediaType = base64DataUrl.split(';')[0].split(':')[1] || 'image/jpeg';
+
+  const prompt = `You are a coupon data extractor. Look at this coupon image and extract the following fields. Return ONLY a valid JSON object with these exact keys (use null if not found):
+{
+  "retailerName": "store or brand name",
+  "couponTitle": "short offer headline like '20% off' or 'Buy one get one'",
+  "description": "any restrictions or details",
+  "couponCode": "any alphanumeric promo or coupon code printed",
+  "barcodeValue": "if a barcode or QR code is visible, extract the numeric/alphanumeric value encoded in it — look for digits printed beneath the barcode",
+  "couponType": "one of: Grocery, Clothing, Restaurant, Beauty, Home, Electronics, Pharmacy, Online Promo Code, In-Store Coupon, Free Item, Percentage Off, Dollar Amount Off, Other",
+  "expirationDate": "date in YYYY-MM-DD format, or null",
+  "notes": "any other important info like 'one per customer' or 'in-store only'"
+}
+Return ONLY the JSON, no markdown, no explanation.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+    // Strip markdown fences if present
+    const cleaned = raw.replace(/```json|```/gi, '').trim();
+    const extracted = JSON.parse(cleaned);
+
+    let filled = 0;
+    const fill = (fieldId, value) => {
+      if (value && !document.getElementById(fieldId)?.value?.trim()) {
+        document.getElementById(fieldId).value = value;
+        highlightField(fieldId);
+        filled++;
+      }
+    };
+
+    fill('fRetailer', extracted.retailerName);
+    fill('fTitle',    extracted.couponTitle);
+    fill('fDesc',     extracted.description);
+    fill('fCode',     extracted.couponCode);
+    fill('fBarcode',  extracted.barcodeValue);
+    fill('fNotes',    extracted.notes);
+    if (extracted.expirationDate && !document.getElementById('fExpiry').value) {
+      document.getElementById('fExpiry').value = extracted.expirationDate;
+      highlightField('fExpiry'); filled++;
+    }
+    if (extracted.couponType && document.getElementById('fType').value === 'Other') {
+      document.getElementById('fType').value = extracted.couponType;
+      filled++;
+    }
+
+    showExtractStatus('ok', filled > 0
+      ? `Auto-filled ${filled} field${filled!==1?'s':''} — review and edit as needed`
+      : 'Image read — no fields could be extracted automatically');
+
+  } catch(err) {
+    console.error('Extraction error:', err);
+    showExtractStatus('err', 'Could not read coupon — fill fields manually');
+  }
+}
+
+// ══ USE COUPON MODAL ══
+let useModalCouponId = null;
+
+function openUseCoupon(id) {
+  const c = coupons.find(x => x.id === id);
+  if (!c) return;
+  useModalCouponId = id;
+  const status = computeStatus(c);
+
+  // Logo
+  const logoWrap = document.getElementById('useModalLogo');
+  logoWrap.innerHTML = '';
+  logoWrap.appendChild(createLogoEl(c.retailerName, 'sm'));
+
+  // Retailer + status badge
+  document.getElementById('useModalRetailer').textContent = c.retailerName;
+  const badgeCls = badgeClass(status);
+  const label = statusLabel(status, c.expirationDate);
+  document.getElementById('useModalStatus').innerHTML =
+    `<span class="badge ${badgeCls}" style="font-size:11px">${esc(label)}</span>`;
+
+  // Title
+  document.getElementById('useModalTitle').textContent = c.couponTitle;
+
+  // Description
+  const descWrap = document.getElementById('useModalDescWrap');
+  if (c.description) {
+    document.getElementById('useModalDesc').textContent = c.description;
+    descWrap.style.display = 'block';
+  } else {
+    descWrap.style.display = 'none';
+  }
+
+  // Promo code
+  const codeWrap = document.getElementById('useModalCodeWrap');
+  if (c.couponCode) {
+    document.getElementById('useModalCode').textContent = c.couponCode;
+    document.getElementById('useModalCopyLabel').innerHTML = '<i class="ti ti-copy" style="font-size:14px"></i>Tap to copy';
+    codeWrap.style.display = 'block';
+  } else {
+    codeWrap.style.display = 'none';
+  }
+
+  // Expiry
+  const expiryEl = document.getElementById('useModalExpiry');
+  if (c.expirationDate) {
+    const d = daysUntil(c.expirationDate);
+    const color = d !== null && d <= 7 ? 'var(--amber-dark)' : 'var(--text-secondary)';
+    expiryEl.style.color = color;
+    expiryEl.innerHTML = `<i class="ti ti-calendar" style="font-size:13px"></i>Expires ${c.expirationDate}`;
+  } else {
+    expiryEl.innerHTML = `<i class="ti ti-calendar" style="font-size:13px"></i>No expiration date`;
+  }
+
+  // Type
+  document.getElementById('useModalType').textContent = c.couponType;
+
+  // Notes
+  const notesWrap = document.getElementById('useModalNotesWrap');
+  if (c.notes) {
+    document.getElementById('useModalNotes').textContent = c.notes;
+    notesWrap.style.display = 'block';
+  } else {
+    notesWrap.style.display = 'none';
+  }
+
+  // Photo button
+  const photoBtn = document.getElementById('useModalPhotoBtn');
+  photoBtn.style.display = c.imageUrl ? 'flex' : 'none';
+
+  // Barcode button
+  const bcBtn = document.getElementById('useModalBarcodeBtn');
+  bcBtn.style.display = c.barcodeValue ? 'flex' : 'none';
+
+  // Action buttons — hide if already redeemed/expired
+  const redeemBtn = document.getElementById('useModalRedeem');
+  const expireBtn = document.getElementById('useModalExpireBtn');
+  const isInactive = status === 'redeemed' || status === 'expired';
+  redeemBtn.style.display = isInactive ? 'none' : 'flex';
+  expireBtn.style.display = isInactive ? 'none' : 'flex';
+
+  document.getElementById('useModal').style.display = 'flex';
+}
+
+function copyCode() {
+  const code = document.getElementById('useModalCode').textContent;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    document.getElementById('useModalCopyLabel').innerHTML =
+      '<i class="ti ti-check" style="font-size:14px"></i>Copied!';
+    setTimeout(() => {
+      document.getElementById('useModalCopyLabel').innerHTML =
+        '<i class="ti ti-copy" style="font-size:14px"></i>Tap to copy';
+    }, 2000);
+  }).catch(() => {
+    // Fallback for browsers without clipboard API
+    const el = document.createElement('textarea');
+    el.value = code;
+    document.body.appendChild(el);
+    el.select(); document.execCommand('copy');
+    document.body.removeChild(el);
+    document.getElementById('useModalCopyLabel').innerHTML =
+      '<i class="ti ti-check" style="font-size:14px"></i>Copied!';
+    setTimeout(() => {
+      document.getElementById('useModalCopyLabel').innerHTML =
+        '<i class="ti ti-copy" style="font-size:14px"></i>Tap to copy';
+    }, 2000);
+  });
+}
+
+function viewImageFromUse() {
+  const c = coupons.find(x => x.id === useModalCouponId);
+  if (!c || !c.imageUrl) return;
+  closeModal('useModal');
+  viewImage(useModalCouponId);
+}
+
+function showBarcodeFromUse() {
+  closeModal('useModal');
+  showBarcode(useModalCouponId);
+}
+
+function redeemFromUse() {
+  markRedeemed(useModalCouponId);
+  closeModal('useModal');
+}
+
+function expireFromUse() {
+  markExpired(useModalCouponId);
+  closeModal('useModal');
+}
+
+// ══ BARCODE DISPLAY ══
+function showBarcode(couponId) {
+  const c = coupons.find(x => x.id === couponId);
+  if (!c || !c.barcodeValue) return;
+
+  document.getElementById('barcodeValDisplay').textContent = c.barcodeValue;
+
+  const canvas = document.getElementById('barcodeCanvas');
+  canvas.innerHTML = '';
+
+  // Detect barcode type from value
+  const val = c.barcodeValue.replace(/\s/g, '');
+  let format = 'CODE128'; // universal fallback — scannable by most retail scanners
+  if (/^\d{12}$/.test(val))   format = 'UPC';
+  if (/^\d{13}$/.test(val))   format = 'EAN13';
+  if (/^\d{8}$/.test(val))    format = 'EAN8';
+
+  try {
+    JsBarcode(canvas, val, {
+      format,
+      width: 2,
+      height: 80,
+      displayValue: false,
+      margin: 0,
+      background: '#ffffff',
+      lineColor: '#000000'
+    });
+  } catch(e) {
+    // Fallback to CODE128 if specific format fails
+    try {
+      JsBarcode(canvas, val, { format:'CODE128', width:2, height:80, displayValue:false, margin:0 });
+    } catch(e2) {
+      canvas.parentElement.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text-secondary);font-size:13px">Could not render barcode for: ${esc(val)}</div>`;
+    }
+  }
+
+  document.getElementById('barcodeModal').style.display = 'flex';
+}
+
+// ══ MODAL / TOAST ══
+function closeModal(id){document.getElementById(id).style.display="none";}
+function overlayClose(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal("formModal");closeModal("imgModal");closeModal("useModal");closeModal("barcodeModal");document.getElementById("appearPanel").classList.remove("open");}});
+let toastTimer=null;
+function showToast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2400);}
+
+// ══ INIT ══
+loadTheme(); applyTheme(); populateTypeSelect(); renderAll();
+
+// ══ SERVICE WORKER REGISTRATION ══
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('[SW] Registered:', reg.scope))
+      .catch(err => console.warn('[SW] Registration failed:', err));
+  });
+}
+
+// ══ PWA INSTALL PROMPT ══
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Show a subtle install banner after 30 seconds if not already installed
+  setTimeout(() => {
+    if (deferredInstallPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+      showToast('Tip: install Coupon Vault as an app for the best experience');
+    }
+  }, 30000);
+});
+
+// ══ HANDLE ?action=add SHORTCUT ══
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('action') === 'add') {
+  setTimeout(() => openAdd(), 300);
+}
+</script>
+</body>
+</html>

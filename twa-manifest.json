@@ -1,0 +1,38 @@
+{
+  "packageId": "com.couponvault.app",
+  "host": "your-domain.com",
+  "name": "Coupon Vault",
+  "launcherName": "Coupon Vault",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#1D9E75",
+  "navigationColor": "#1D9E75",
+  "navigationColorDark": "#085041",
+  "navigationDividerColor": "#1D9E75",
+  "navigationDividerColorDark": "#085041",
+  "backgroundColor": "#f5f4f0",
+  "enableNotifications": true,
+  "startUrl": "/index.html",
+  "iconUrl": "https://your-domain.com/icons/icon-512.png",
+  "maskableIconUrl": "https://your-domain.com/icons/icon-512.png",
+  "monochromeIconUrl": "https://your-domain.com/icons/icon-192.png",
+  "appVersion": "1",
+  "appVersionName": "1.0.0",
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "couponvault"
+  },
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "features": {
+    "locationDelegation": { "enabled": false },
+    "playBilling": { "enabled": false }
+  },
+  "alphaDependencies": { "enabled": false },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://your-domain.com/",
+  "minSdkVersion": 19,
+  "targetSdkVersion": 34
+}
