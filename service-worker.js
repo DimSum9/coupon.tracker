@@ -1,15 +1,16 @@
 // Coupon Vault — Service Worker
 // Caches the app shell and all assets for full offline use.
 
-const CACHE_NAME = 'coupon-vault-v1';
-const CACHE_VERSION = 1;
+const CACHE_NAME = 'coupon-vault-v2';
+const CACHE_VERSION = 2;
 
 // Core app shell — everything needed to run offline
 const PRECACHE_URLS = [
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  './',
+  'index.html',
+  'manifest.json',
+  'icons/icon-192.png',
+  'icons/icon-512.png',
 ];
 
 // CDN resources cached on first fetch
@@ -81,7 +82,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Offline fallback — return the main app HTML for navigation requests
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('index.html');
         }
       });
     })
@@ -102,10 +103,10 @@ self.addEventListener('push', event => {
   const title = data.title || 'Coupon Vault';
   const options = {
     body: data.body || 'You have coupons expiring soon!',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-192.png',
     tag: data.tag || 'coupon-reminder',
-    data: { url: data.url || '/' },
+    data: { url: data.url || './' },
     actions: [
       { action: 'view', title: 'View coupons' },
       { action: 'dismiss', title: 'Dismiss' }
@@ -120,9 +121,9 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(windowClients => {
       for (const client of windowClients) {
-        if (client.url === '/' && 'focus' in client) return client.focus();
+        if ('focus' in client) return client.focus();
       }
-      if (clients.openWindow) return clients.openWindow('/');
+      if (clients.openWindow) return clients.openWindow('./');
     })
   );
 });
